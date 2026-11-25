@@ -5,9 +5,12 @@ config:
 erDiagram
     USER |o--o{ VENUE : "suggests"
     CITY ||--o{ VENUE : "contains"
-    VENUE }o--o{ VENUE_TYPE : "classified as"
-    VENUE }o--o{ FEATURE : "has"
-    USER }o--o{ VENUE : "favorites"
+    VENUE ||--o{ VENUE_TYPE_ASSIGNMENT : "classified as"
+    VENUE_TYPE ||--o{ VENUE_TYPE_ASSIGNMENT : "assigned to"
+    VENUE ||--o{ VENUE_FEATURE : "has"
+    FEATURE ||--o{ VENUE_FEATURE : "applies to"
+    USER ||--o{ USER_FAVORITE : "favorites"
+    VENUE ||--o{ USER_FAVORITE : "favorited by"
     VENUE ||--o{ WORKING_HOURS : "open during"
     VENUE ||--o{ MENU_ITEM : "offers"
     VENUE ||--o{ MODERATION_ACTION : "reviewed via"
@@ -68,9 +71,22 @@ erDiagram
         int id PK
         string name UK
     }
+    VENUE_TYPE_ASSIGNMENT {
+        int venue_id PK, FK
+        int venue_type_id PK, FK
+    }
     FEATURE {
         int id PK
         string name UK
+    }
+    VENUE_FEATURE {
+        int venue_id PK, FK
+        int feature_id PK, FK
+    }
+    USER_FAVORITE {
+        int user_id PK, FK
+        int venue_id PK, FK
+        datetime created_at
     }
     WORKING_HOURS {
         int id PK
