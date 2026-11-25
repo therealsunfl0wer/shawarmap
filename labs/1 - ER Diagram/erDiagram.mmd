@@ -3,189 +3,189 @@ config:
   layout: elk
 ---
 erDiagram
-    USER |o--o{ VENUE : "suggests"
+    USERS |o--o{ VENUE : "suggests"
     CITY ||--o{ VENUE : "contains"
-    VENUE ||--o{ VENUE_TYPE_ASSIGNMENT : "classified as"
-    VENUE_TYPE ||--o{ VENUE_TYPE_ASSIGNMENT : "assigned to"
+    VENUE ||--o{ VENUE_VENUE_TYPE : "classified by"
+    VENUE_TYPE ||--o{ VENUE_VENUE_TYPE : "assigned to"
     VENUE ||--o{ VENUE_FEATURE : "has"
-    FEATURE ||--o{ VENUE_FEATURE : "applies to"
-    USER ||--o{ USER_FAVORITE : "favorites"
-    VENUE ||--o{ USER_FAVORITE : "favorited by"
+    FEATURE ||--o{ VENUE_FEATURE : "assigned to"
+    USERS ||--o{ FAVORITE : "favorites"
+    VENUE ||--o{ FAVORITE : "is favorited"
     VENUE ||--o{ WORKING_HOURS : "open during"
     VENUE ||--o{ MENU_ITEM : "offers"
     VENUE ||--o{ MODERATION_ACTION : "reviewed via"
-    USER ||--o{ MODERATION_ACTION : "performs"
-    USER |o--o{ REVIEW : "writes"
+    USERS ||--o{ MODERATION_ACTION : "performs"
+    USERS |o--o{ REVIEW : "writes"
     VENUE ||--o{ REVIEW : "receives"
     REVIEW ||--o{ REVIEW_COMMENT : "has"
-    USER |o--o{ REVIEW_COMMENT : "writes"
+    USERS |o--o{ REVIEW_COMMENT : "writes"
     REVIEW_COMMENT |o--o{ REVIEW_COMMENT : "replies to"
     REVIEW |o--o{ PHOTO : "illustrated by"
     VENUE |o--o{ PHOTO : "shown in"
-    USER |o--o{ PHOTO : "uploads"
-    USER |o--o{ REPORT : "files"
+    USERS |o--o{ PHOTO : "uploads"
+    USERS |o--o{ REPORT : "files"
     REVIEW |o--o{ REPORT : "target"
     REVIEW_COMMENT |o--o{ REPORT : "target"
     VENUE |o--o{ REPORT : "target"
-    USER ||--o{ VENUE_CLAIM : "submits"
-    USER |o--o{ VENUE_CLAIM : "verifies"
+    USERS ||--o{ VENUE_CLAIM : "submits"
+    USERS |o--o{ VENUE_CLAIM : "verifies"
     VENUE ||--o{ VENUE_CLAIM : "claimed in"
     VENUE ||--o{ VENUE_STAFF : "managed by"
-    USER ||--o{ VENUE_STAFF : "works at"
+    USERS ||--o{ VENUE_STAFF : "works at"
     VENUE ||--o{ PROMOTION : "advertised by"
-    USER |o--o{ PROMOTION : "creates"
-    USER |o--o{ PROMOTION : "reviews"
+    USERS |o--o{ PROMOTION : "creates"
+    USERS |o--o{ PROMOTION : "reviews"
     PROMOTION ||--o{ PROMOTION_STAT : "measured by"
 
-    USER {
-        int id PK
+    USERS {
+        int user_id PK
         string email UK
-        string pass_hash
+        text pass_hash
         string display_name
-        URI avatar_url
+        text avatar_url "nullable"
         enum role "user, moderator, admin"
         enum status "active, deleted"
-        datetime created_at
-        datetime deleted_at "nullable"
+        timestamptz created_at
+        timestamptz deleted_at "nullable"
     }
     CITY {
-        int id PK
+        int city_id PK
         string name
         string region
     }
     VENUE {
-        int id PK
+        int venue_id PK
         int city_id FK
         int created_by FK "nullable"
         enum status "pending, approved, rejected"
         string name
-        string description
-        string address
+        text description
+        text address
         double latitude
         double longitude
         string phone_number
-        string website
-        datetime created_at
+        text website
+        timestamptz created_at
     }
     VENUE_TYPE {
-        int id PK
+        int venue_type_id PK
         string name UK
     }
-    VENUE_TYPE_ASSIGNMENT {
+    VENUE_VENUE_TYPE {
         int venue_id PK, FK
         int venue_type_id PK, FK
     }
     FEATURE {
-        int id PK
+        int feature_id PK
         string name UK
     }
     VENUE_FEATURE {
         int venue_id PK, FK
         int feature_id PK, FK
     }
-    USER_FAVORITE {
+    FAVORITE {
         int user_id PK, FK
         int venue_id PK, FK
-        datetime created_at
+        timestamptz created_at
     }
     WORKING_HOURS {
-        int id PK
+        int working_hours_id PK
         int venue_id FK
         smallint weekday "1-7"
         time opens_at
         time closes_at
     }
     MENU_ITEM {
-        int id PK
+        int menu_item_id PK
         int venue_id FK
         string name
-        string description
+        text description
         decimal price
         boolean is_available
     }
     MODERATION_ACTION {
-        int id PK
+        int moderation_action_id PK
         int venue_id FK
         int moderator_id FK
         enum action "approve, reject, request_changes"
-        string note
-        datetime created_at
+        text note
+        timestamptz created_at
     }
     REVIEW {
-        int id PK
+        int review_id PK
         int venue_id FK
-        int user_id FK "nullable, anonymized on deletion"
+        int user_id FK "nullable"
         smallint rating "1-10"
-        string text
+        text text
         date visited_on
         enum status "visible, hidden"
-        datetime created_at
-        datetime updated_at
-    }
-    REVIEW_COMMENT {
-        int id PK
-        int review_id FK
-        int user_id FK "nullable"
-        int parent_comment_id FK "nullable"
-        string text
-        boolean is_official "true: on behalf of the venue"
-        datetime created_at
-    }
-    PHOTO {
-        int id PK
-        int venue_id FK "nullable"
-        int review_id FK "nullable, exactly one of two"
-        int uploaded_by FK "nullable"
-        URI url
-        datetime created_at
-    }
-    REPORT {
-        int id PK
-        int reporter_id FK "nullable"
-        int review_id FK "nullable"
-        int comment_id FK "nullable"
-        int venue_id FK "nullable, exactly one of three"
-        string reason
-        enum status "open, resolved, dismissed"
-        int handled_by FK "nullable"
-        datetime created_at
+        timestamptz created_at
+        timestamptz updated_at
     }
     VENUE_CLAIM {
-        int id PK
+        int venue_claim_id PK
         int venue_id FK
         int claimant_id FK
-        string contact_info
-        string evidence
+        text contact_info
+        text evidence
         enum status "pending, approved, rejected"
-        int reviewed_by FK "nullable, admin"
-        datetime reviewed_at "nullable"
-        string review_note
-        datetime created_at
+        int reviewed_by FK "nullable"
+        timestamptz reviewed_at "nullable"
+        text review_note "nullable"
+        timestamptz created_at
     }
     VENUE_STAFF {
         int venue_id PK, FK
         int user_id PK, FK
         enum role "owner, manager"
         int added_by FK "nullable"
-        datetime added_at
+        timestamptz added_at
     }
     PROMOTION {
-        int id PK
+        int promotion_id PK
         int venue_id FK
-        int created_by FK "nullable, venue staff"
+        int created_by FK "nullable"
         enum type "featured, offer"
-        string title
-        string description
-        URI image_url
-        datetime starts_at
-        datetime ends_at
+        text title
+        text description
+        text image_url
+        timestamptz starts_at
+        timestamptz ends_at
         enum status "draft, pending, active, ended, rejected"
-        int reviewed_by FK "nullable, moderator"
-        datetime reviewed_at "nullable"
-        string review_note
+        int reviewed_by FK "nullable"
+        timestamptz reviewed_at "nullable"
+        text review_note "nullable"
+    }
+    REVIEW_COMMENT {
+        int review_comment_id PK
+        int review_id FK
+        int user_id FK "nullable"
+        int parent_comment_id FK "nullable"
+        text text
+        boolean is_official
+        timestamptz created_at
+    }
+    PHOTO {
+        int photo_id PK
+        int venue_id FK "nullable; XOR with review_id"
+        int review_id FK "nullable; XOR with venue_id"
+        int uploaded_by FK "nullable"
+        text url
+        timestamptz created_at
+    }
+    REPORT {
+        int report_id PK
+        int reporter_id FK "nullable"
+        int review_id FK "nullable; exactly one target"
+        int comment_id FK "nullable; exactly one target"
+        int venue_id FK "nullable; exactly one target"
+        text reason
+        enum status "open, resolved, dismissed"
+        int handled_by FK "nullable"
+        timestamptz created_at
     }
     PROMOTION_STAT {
-        int id PK
+        int promotion_stat_id PK
         int promotion_id FK
         date stat_date
         int impressions
